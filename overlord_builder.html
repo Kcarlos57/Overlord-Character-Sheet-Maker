@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>YGGDRASIL — Character Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07050a;--bg2:#0e0b10;--sur:#130f16;--sur2:#1a1520;
+  --brd:#2d1f2e;--brd2:#3d2a3e;
+  --cr:#8c1f1f;--cr2:#b52525;--bld:#5c0d0d;
+  --gd:#c9a43c;--gd2:#e8c46a;
+  --bn:#d8c9b0;--bn2:#ede0c6;
+  --mt:#7a6a80;--mt2:#5a4d60;
+  --pu:#6b3a8c;--pu2:#9b5acc;
+  --sk:#1e5070;--sk2:#3a8ab0;
+  --am:#8c5a10;--am2:#c87e20;
+  --ro:#6e1515;--ro2:#a02020;
+  --em:#1a4a2e;--em2:#2a7a48;
+  --gcr:0 0 12px rgba(140,31,31,.4);
+  --ggd:0 0 10px rgba(201,164,60,.35)
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--bn);font-family:'IM Fell English',Georgia,serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),radial-gradient(ellipse 80% 60% at 50% 0%,rgba(80,20,20,.12) 0%,transparent 70%),radial-gradient(ellipse 60% 80% at 0% 100%,rgba(50,15,60,.08) 0%,transparent 70%),linear-gradient(180deg,#07050a,#0a0710 50%,#07050a);pointer-events:none;z-index:0}
+.embers{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.ember{position:absolute;bottom:-10px;width:2px;height:2px;border-radius:50%;animation:rise linear infinite;opacity:0}
+@keyframes rise{0%{transform:translateY(0) translateX(0) scale(1);opacity:0}10%{opacity:.8}90%{opacity:.3}100%{transform:translateY(-100vh) translateX(var(--dx)) scale(0);opacity:0}}
+.page-outer{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:2rem 1.5rem 4rem}
+.page-top{max-width:660px;margin:0 auto}
+.page-cols{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start}
+.page-cols .col-left,.page-cols .col-right{min-width:0}
+@media(max-width:860px){.page-cols{grid-template-columns:1fr}}
+
+/* HEADER */
+.hdr{text-align:center;padding:2.5rem 0 2rem;position:relative}
+.hdr::before{content:'';position:absolute;left:50%;transform:translateX(-50%);bottom:0;width:80%;height:1px;background:linear-gradient(90deg,transparent,var(--cr),var(--gd),var(--cr),transparent)}
+.eyebrow{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.45em;color:var(--gd);text-transform:uppercase;margin-bottom:.75rem;opacity:.85}
+.site-title{font-family:'Cinzel Decorative',serif;font-size:clamp(1.6rem,5vw,2.8rem);font-weight:900;color:var(--bn2);text-shadow:0 0 30px rgba(140,31,31,.5),0 2px 4px rgba(0,0,0,.9)}
+.blood{color:var(--cr2);text-shadow:0 0 20px rgba(181,37,37,.7)}
+.site-sub{font-style:italic;color:var(--mt);font-size:.9rem;margin-top:.5rem;letter-spacing:.05em}
+
+/* NAME INPUT */
+.name-wrap{margin:1.5rem 0 1rem}
+.name-wrap label{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.4em;text-transform:uppercase;color:var(--gd);display:block;margin-bottom:.5rem}
+.name-inp{width:100%;background:transparent;border:none;border-bottom:1px solid var(--brd2);font-family:'Cinzel Decorative',serif;font-size:1.5rem;font-weight:700;color:var(--bn2);padding:.25rem 0;outline:none;transition:border-color .3s;caret-color:var(--cr2)}
+.name-inp:focus{border-bottom-color:var(--cr2)}
+.name-inp::placeholder{color:var(--mt2)}
+
+/* STAT PANEL */
+.stat-pan{background:var(--sur);border:1px solid var(--brd);border-top:2px solid var(--cr);padding:1.25rem 1.5rem;margin:1.25rem 0;position:relative;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
+.stat-pan::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--cr),var(--gd),var(--cr));opacity:.6}
+.srow{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem}
+.srow:last-child{margin-bottom:0}
+.slbl{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;width:3.5rem;text-align:right;flex-shrink:0}
+.slbl.racial{color:var(--pu2)}.slbl.job{color:var(--sk2)}.slbl.total{color:var(--gd)}.slbl.done{color:var(--gd2)}
+.btrack{flex:1;height:6px;background:rgba(255,255,255,.04);border:1px solid var(--brd);overflow:hidden}
+.bfill{height:100%;transition:width .4s ease;position:relative}
+.bfill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:2px;background:rgba(255,255,255,.5);filter:blur(1px)}
+.bfill.racial{background:linear-gradient(90deg,var(--pu),var(--pu2))}
+.bfill.job{background:linear-gradient(90deg,var(--sk),var(--sk2))}
+.bfill.total{background:linear-gradient(90deg,var(--cr),var(--gd))}
+.bfill.done{background:linear-gradient(90deg,var(--am),var(--gd2))}
+.bval{font-family:'Cinzel',serif;font-size:.7rem;width:4rem;text-align:right;flex-shrink:0}
+.bval.racial{color:var(--pu2)}.bval.job{color:var(--sk2)}.bval.total{color:var(--gd)}.bval.done{color:var(--gd2)}
+.sdiv{height:1px;background:var(--brd);margin:.75rem 0}
+.caption{font-style:italic;font-size:.8rem;color:var(--mt2);margin:.5rem 0 1.25rem;line-height:1.5}
+
+/* RUNE DIVIDER */
+.rdiv{display:flex;align-items:center;gap:.75rem;margin:1.25rem 0}
+.rdiv .ln{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--brd2))}
+.rdiv .ln.r{background:linear-gradient(90deg,var(--brd2),transparent)}
+.rdiv .gl{font-family:'Cinzel',serif;color:var(--mt2);font-size:.75rem;letter-spacing:.2em}
+
+/* COLLAPSIBLE PANELS */
+.cpanel{background:var(--sur);border:1px solid var(--brd2);border-top:2px solid var(--gd);margin-bottom:1.25rem;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)}
+.cpanel.red-top{border-top-color:var(--cr2)}
+.chdr{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.1rem;cursor:pointer;user-select:none;border-bottom:1px solid transparent;transition:border-color .2s}
+.chdr:hover{border-bottom-color:var(--brd)}
+.chdr-l{display:flex;align-items:center;gap:.75rem}
+.ctitle{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.35em;text-transform:uppercase}
+.ctitle.gd{color:var(--gd)}.ctitle.cr{color:var(--cr2)}
+.ccount{font-family:'Cinzel',serif;font-size:.58rem;color:var(--mt2);letter-spacing:.1em}
+.chevron{font-size:.65rem;color:var(--mt2);transition:transform .25s;flex-shrink:0}
+.chevron.open{transform:rotate(180deg)}
+.cbody{padding:.75rem 1.1rem 1rem;display:none}
+.cbody.open{display:block}
+
+/* DETAILS FORM */
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.dfield{display:flex;flex-direction:column;gap:.3rem}
+.dfield label{font-family:'Cinzel',serif;font-size:.55rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gd)}
+.dinp{background:var(--bg2);border:1px solid var(--brd2);color:var(--bn);font-family:'IM Fell English',serif;font-size:.88rem;padding:.4rem .65rem;outline:none;transition:border-color .2s;caret-color:var(--cr2);width:100%}
+.dinp:focus{border-color:var(--cr)}
+.dinp::placeholder{color:var(--mt2);font-style:italic}
+.dinp.full{grid-column:1/-1}
+
+/* ABILITY SLIDERS */
+.arow{display:flex;align-items:center;gap:.75rem;margin-bottom:.55rem}
+.arow:last-child{margin-bottom:0}
+.albl{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--bn2);width:5.5rem;text-align:right;flex-shrink:0}
+.aslider{flex:1;-webkit-appearance:none;appearance:none;height:4px;background:var(--brd2);border-radius:0;outline:none;cursor:pointer}
+.aslider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--cr2);border:1px solid var(--gd);cursor:pointer;transform:rotate(45deg)}
+.aslider::-moz-range-thumb{width:14px;height:14px;background:var(--cr2);border:1px solid var(--gd);cursor:pointer;border-radius:0}
+.aval{font-family:'Cinzel',serif;font-size:.7rem;color:var(--gd);width:2.5rem;text-align:right;flex-shrink:0}
+
+/* VAULT */
+.vact{display:flex;gap:.5rem;margin-bottom:.75rem;flex-wrap:wrap}
+.bvault{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;padding:.3rem .75rem;border:1px solid;background:transparent;cursor:pointer;transition:all .2s}
+.bvault.imp{border-color:var(--am);color:var(--am2)}.bvault.imp:hover{background:rgba(140,90,16,.1);color:var(--bn2)}
+.bvault.exp{border-color:var(--sk);color:var(--sk2)}.bvault.exp:hover{background:rgba(30,80,112,.1);color:var(--bn2)}
+.slist{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.85rem}
+.sentry{display:flex;align-items:center;gap:.5rem;padding:.55rem .75rem;background:var(--bg2);border:1px solid var(--brd);transition:all .2s}
+.sentry:hover{border-color:var(--brd2);background:var(--sur2)}
+.sinfo{flex:1;min-width:0}
+.sname{font-family:'Cinzel',serif;font-size:.82rem;color:var(--bn2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.smeta{font-style:italic;font-size:.7rem;color:var(--mt2);margin-top:.1rem}
+.sacts{display:flex;gap:.35rem;flex-shrink:0}
+.sbtn{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;padding:.25rem .6rem;border:1px solid;cursor:pointer;transition:all .15s;background:transparent}
+.sbtn.load{border-color:var(--sk);color:var(--sk2)}.sbtn.load:hover{border-color:var(--sk2);color:var(--bn2);background:rgba(30,80,112,.12)}
+.sbtn.dl{border-color:var(--am);color:var(--am2)}.sbtn.dl:hover{border-color:var(--am2);color:var(--bn2);background:rgba(140,90,16,.1)}
+.sbtn.del{border-color:var(--ro);color:var(--ro2)}.sbtn.del:hover{border-color:var(--cr2);color:var(--cr2);background:rgba(140,31,31,.1)}
+.sempty{font-style:italic;font-size:.82rem;color:var(--mt2);text-align:center;padding:.75rem;border:1px dashed var(--brd)}
+.save-row{display:flex;gap:.5rem;align-items:stretch;border-top:1px solid var(--brd);padding-top:.75rem}
+.sinp{flex:1;background:var(--bg2);border:1px solid var(--brd2);color:var(--bn);font-family:'IM Fell English',serif;font-size:.9rem;padding:.4rem .65rem;outline:none;transition:border-color .2s;caret-color:var(--cr2)}
+.sinp::placeholder{color:var(--mt2);font-style:italic}
+.sinp:focus{border-color:var(--cr)}
+.bseal{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;padding:.4rem .9rem;background:linear-gradient(135deg,var(--bld),var(--cr));border:1px solid var(--cr2);color:var(--bn2);cursor:pointer;transition:all .2s;white-space:nowrap}
+.bseal:hover{background:linear-gradient(135deg,var(--cr),var(--cr2));box-shadow:var(--gcr)}
+
+/* GENERATE SHEET BUTTON */
+.bgen{width:100%;padding:.85rem;background:linear-gradient(135deg,rgba(92,13,13,.3),rgba(140,31,31,.2));border:1px solid var(--cr2);color:var(--bn2);font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.3em;text-transform:uppercase;cursor:pointer;transition:all .25s;margin-bottom:1.25rem;position:relative;overflow:hidden}
+.bgen::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(201,164,60,.06),transparent);transform:translateX(-100%);transition:transform .4s}
+.bgen:hover{border-color:var(--gd);color:var(--gd2);box-shadow:var(--ggd)}
+.bgen:hover::before{transform:translateX(100%)}
+
+/* ADD CLASS */
+.badd{width:100%;padding:.85rem;background:transparent;border:1px dashed var(--brd2);color:var(--mt2);font-family:'Cinzel',serif;font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .25s;margin-bottom:1.25rem}
+.badd:hover{border-color:var(--cr);color:var(--bn);background:rgba(140,31,31,.05)}
+
+/* CLASS FORM */
+.form-panel{background:var(--sur);border:1px solid var(--brd2);border-left:3px solid var(--cr);padding:1.5rem;margin-bottom:1.25rem}
+.form-panel::before{content:'✦ ' attr(data-title) ' ✦';font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.35em;text-transform:uppercase;color:var(--cr2);display:block;margin-bottom:1.25rem}
+.field{margin-bottom:1rem}
+.field label{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gd);display:block;margin-bottom:.4rem}
+.field input[type=text],.field input[type=number]{width:100%;background:var(--bg2);border:1px solid var(--brd2);color:var(--bn);font-family:'IM Fell English',serif;font-size:.95rem;padding:.5rem .75rem;outline:none;transition:border-color .2s;caret-color:var(--cr2)}
+.field input:focus{border-color:var(--cr)}
+.field input::placeholder{color:var(--mt2);font-style:italic}
+.tgrp{display:flex;gap:.5rem;flex-wrap:wrap}
+.tbtn{flex:1;min-width:max-content;padding:.4rem .6rem;background:var(--bg2);border:1px solid var(--brd);color:var(--mt);font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s;text-align:center}
+.tbtn:hover{border-color:var(--brd2);color:var(--bn)}
+.tbtn.ar{border-color:var(--pu2);color:var(--pu2);background:rgba(107,58,140,.12)}
+.tbtn.aj{border-color:var(--sk2);color:var(--sk2);background:rgba(30,80,112,.12)}
+.tbtn.as{border-color:var(--sk2);color:var(--sk2);background:rgba(30,80,112,.1)}
+.tbtn.ap{border-color:var(--am2);color:var(--am2);background:rgba(140,90,16,.1)}
+.tbtn.ac{border-color:var(--cr2);color:var(--cr2);background:rgba(140,31,31,.12)}
+.tcap{display:block;font-size:.5rem;letter-spacing:.1em;opacity:.55;margin-top:.15rem}
+.cwarn{margin-top:.4rem;font-size:.78rem;color:var(--cr2);font-style:italic}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.4rem}
+.chip{font-family:'Cinzel',serif;font-size:.58rem;padding:.2rem .55rem;background:var(--bg2);border:1px solid var(--brd2);color:var(--mt);cursor:pointer;transition:all .15s}
+.chip:hover{border-color:var(--gd);color:var(--gd)}
+.fact{display:flex;gap:.6rem;margin-top:1.25rem}
+.bsub{flex:1;padding:.65rem;background:linear-gradient(135deg,var(--bld),var(--cr));border:1px solid var(--cr2);color:var(--bn2);font-family:'Cinzel',serif;font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .2s;box-shadow:0 2px 12px rgba(92,13,13,.5)}
+.bsub:hover{background:linear-gradient(135deg,var(--cr),var(--cr2));box-shadow:var(--gcr)}
+.bcanc{padding:.65rem 1rem;background:var(--bg2);border:1px solid var(--brd2);color:var(--mt);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.bcanc:hover{color:var(--bn)}
+
+/* BUILD LIST */
+.sec-hd{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;margin-top:1.5rem}
+.sec-hd:first-child{margin-top:0}
+.sec-nm{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.35em;text-transform:uppercase;flex-shrink:0}
+.sec-nm.racial{color:var(--pu2)}.sec-nm.std{color:var(--sk2)}.sec-nm.pres{color:var(--am2)}.sec-nm.cap{color:var(--cr2)}
+.sec-rl{flex:1;height:1px;background:var(--brd)}
+.sec-ct{font-family:'Cinzel',serif;font-size:.6rem;color:var(--mt2);flex-shrink:0}
+.clist{display:flex;flex-direction:column;gap:.5rem}
+.ccard{display:flex;align-items:center;gap:.75rem;padding:.65rem .85rem;border:1px solid var(--brd);background:var(--sur);transition:all .2s;position:relative;overflow:hidden}
+.ccard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px}
+.ccard.standard::before{background:var(--sk2)}.ccard.prestige::before{background:var(--am2)}.ccard.capstone::before{background:var(--cr2)}
+.ccard:hover{border-color:var(--brd2);background:var(--sur2)}
+.ccard.pwarn{border-color:var(--am)}
+.cinfo{flex:1;min-width:0}
+.cname{font-family:'Cinzel',serif;font-size:.85rem;color:var(--bn2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.cmeta{display:flex;align-items:center;gap:.5rem;margin-top:.2rem;flex-wrap:wrap}
+.badge{font-family:'Cinzel',serif;font-size:.5rem;letter-spacing:.15em;text-transform:uppercase;padding:.1rem .4rem;border:1px solid}
+.badge.standard{border-color:var(--sk);color:var(--sk2)}.badge.prestige{border-color:var(--am);color:var(--am2)}
+.badge.capstone{border-color:var(--cr);color:var(--cr2)}.badge.racial{border-color:var(--pu);color:var(--pu2)}
+.badge.job{border-color:var(--sk);color:var(--mt)}.badge.warn{border-color:var(--am2);color:var(--am2);font-size:.55rem}
+.cpreq{font-style:italic;font-size:.7rem;color:var(--mt2);margin-top:.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lvctl{display:flex;align-items:center;gap:.35rem;flex-shrink:0}
+.lvbtn{width:22px;height:22px;background:var(--bg2);border:1px solid var(--brd2);color:var(--bn);font-size:.9rem;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.lvbtn:hover{border-color:var(--cr);color:var(--cr2)}
+.lvbtn:disabled{opacity:.25;cursor:not-allowed}
+.lvdisp{text-align:center;width:2.2rem}
+.lvnum{font-family:'Cinzel',serif;font-size:.95rem;color:var(--bn2);display:block;line-height:1}
+.lvmax{font-size:.55rem;color:var(--mt2);font-family:'Cinzel',serif;display:block}
+.cacts{display:flex;gap:.25rem;opacity:0;transition:opacity .15s;flex-shrink:0}
+.ccard:hover .cacts{opacity:1}
+.cbtn{width:22px;height:22px;background:transparent;border:1px solid var(--brd2);color:var(--mt2);font-size:.75rem;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.cbtn.ed:hover{border-color:var(--sk2);color:var(--sk2)}.cbtn.rm:hover{border-color:var(--cr2);color:var(--cr2)}
+.empty{text-align:center;padding:3.5rem 2rem;border:1px dashed var(--brd);color:var(--mt2);font-style:italic;font-size:.95rem;line-height:1.6}
+.eg{font-size:2rem;display:block;margin-bottom:.75rem;opacity:.3}
+
+/* SUMMARY */
+.summ{margin-top:2rem;background:var(--sur);border:1px solid var(--brd);border-top:2px solid var(--gd);padding:1.25rem 1.5rem;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px))}
+.summ::before{content:'✦ Build Summary ✦';font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.4em;color:var(--gd);display:block;margin-bottom:.75rem;text-transform:uppercase}
+.sgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem 0;font-family:'Cinzel',serif;font-size:.72rem;color:var(--mt)}
+.sgrid .v{color:var(--bn2)}
+.stot{margin-top:.65rem;padding-top:.65rem;border-top:1px solid var(--brd);font-family:'Cinzel',serif;font-size:.8rem;color:var(--mt)}
+.stot .v{font-size:1rem;font-weight:600}
+.stot .done{color:var(--gd2);text-shadow:var(--ggd)}.stot .prog{color:var(--em2)}
+.swarn{margin-top:.65rem;padding-top:.65rem;border-top:1px solid var(--brd);font-style:italic;font-size:.8rem;color:var(--am2)}
+.scap{margin-top:.4rem;font-style:italic;font-size:.82rem;color:var(--cr2)}
+
+/* FOOTER */
+.ftr{margin-top:2.5rem;text-align:center;font-family:'Cinzel',serif;font-size:.55rem;letter-spacing:.3em;color:var(--mt2);text-transform:uppercase;opacity:.5;line-height:2}
+
+/* TOAST */
+#toast{position:fixed;top:1.25rem;right:1.25rem;z-index:9999;padding:.75rem 1.25rem;font-family:'Cinzel',serif;font-size:.75rem;letter-spacing:.08em;border:1px solid;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);opacity:0;transform:translateY(-8px);transition:all .25s;max-width:300px;pointer-events:none}
+#toast.show{opacity:1;transform:translateY(0)}
+#toast.ok{background:rgba(26,74,46,.95);border-color:var(--em2);color:#7dcc9a}
+#toast.err{background:rgba(92,13,13,.95);border-color:var(--cr2);color:#e87070}
+#toast.wrn{background:rgba(80,50,10,.95);border-color:var(--am2);color:#e8b060}
+#toast.inf{background:rgba(20,20,30,.95);border-color:var(--brd2);color:var(--bn)}
+
+/* CONFIRM */
+.ov-conf{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;display:flex;align-items:center;justify-content:center}
+.conf-box{background:var(--sur);border:1px solid var(--cr2);border-top:2px solid var(--cr2);padding:1.75rem 2rem;max-width:380px;width:90%;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));box-shadow:0 0 40px rgba(140,31,31,.3)}
+.conf-ttl{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.35em;text-transform:uppercase;color:var(--cr2);margin-bottom:.75rem}
+.conf-msg{font-style:italic;font-size:.92rem;color:var(--bn);line-height:1.5;margin-bottom:1.25rem}
+.conf-act{display:flex;gap:.6rem}
+.bcy{flex:1;padding:.55rem;background:linear-gradient(135deg,var(--bld),var(--cr));border:1px solid var(--cr2);color:var(--bn2);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.bcy:hover{box-shadow:var(--gcr)}
+.bcn{padding:.55rem 1rem;background:var(--bg2);border:1px solid var(--brd2);color:var(--mt);font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.bcn:hover{color:var(--bn)}
+
+/* ═══════════════════════════════
+   CHARACTER SHEET MODAL
+═══════════════════════════════ */
+.ov-sheet{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:2000;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:3rem 1rem 2rem}
+.sm{background:#fff;width:100%;max-width:560px;margin:auto;position:relative;box-shadow:0 0 60px rgba(0,0,0,.8)}
+.sm-btns{position:absolute;top:-2.25rem;left:0;right:0;display:flex;justify-content:space-between}
+.sm-btn{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;padding:.3rem .85rem;cursor:pointer;transition:all .2s;border:1px solid}
+.sm-btn.close{background:transparent;border-color:var(--brd2);color:var(--mt)}
+.sm-btn.close:hover{border-color:var(--cr2);color:var(--cr2)}
+.sm-btn.print{background:rgba(140,31,31,.15);border-color:var(--cr2);color:var(--bn2)}
+.sm-btn.print:hover{background:var(--cr);box-shadow:var(--gcr)}
+
+/* — SHEET INTERNAL STYLES — */
+.cs{font-family:'Times New Roman',Times,serif;color:#111;background:#f5f0e8;font-size:11px;line-height:1.4}
+.cs *{box-sizing:border-box}
+/* header bar */
+.cs-hdr{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:#e0d8cc;border-bottom:2px solid #555}
+.cs-hdr-char{font-size:10px;letter-spacing:.15em;color:#444}
+.cs-hdr-race{font-size:9px;letter-spacing:.1em;color:#666;text-align:right}
+/* 3-column top: [image] [info] [classes] — height fully auto */
+.cs-top{display:grid;grid-template-columns:150px 1fr 130px}
+/* image column */
+.cs-img{background:#1a1525;position:relative;overflow:hidden}
+.cs-img img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.cs-img-ph{width:100%;height:100%;min-height:160px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#150f20,#221535);flex-direction:column;gap:8px}
+.cs-img-ph .sk{font-size:3rem;opacity:.22}
+.cs-img-ph .hint{font-size:7.5px;color:#5a4a6a;text-align:center;padding:0 10px;font-family:'Times New Roman',serif}
+/* info column */
+.cs-inf{padding:9px 11px;background:#f5f0e8;border-right:1px solid #ccc}
+.cs-jp{font-family:'Noto Serif JP','Times New Roman',serif;font-size:1.5rem;font-weight:700;color:#1a1520;letter-spacing:.04em;margin-bottom:2px}
+.cs-guild{font-size:9px;color:#333;margin-bottom:3px}
+.cs-guild span{border:1px solid #888;padding:1px 5px;display:inline-block;letter-spacing:.05em}
+.cs-rom{font-size:11.5px;font-weight:700;letter-spacing:.12em;color:#1a1520;margin-bottom:1px}
+.cs-phon{font-size:8.5px;color:#666;margin-bottom:5px;font-style:italic}
+.cs-title{font-size:10px;font-weight:700;text-transform:uppercase;color:#1a1520;line-height:1.3;margin-bottom:7px;border-bottom:1px solid #bbb;padding-bottom:5px;letter-spacing:.03em}
+.cs-tbl{width:100%;border-collapse:collapse;font-size:9px}
+.cs-tbl td{padding:1.5px 3px;vertical-align:top}
+.cs-tbl .lbl{color:#555;white-space:nowrap;width:58px;padding-right:5px}
+.cs-tbl .val{color:#111}
+.cs-just{display:flex;justify-content:flex-end;align-items:center;font-size:9px;margin-top:4px;color:#444}
+.cs-just strong{font-size:11px;color:#1a1520}
+/* classes column — tall single column beside info */
+.cs-cls{background:#f0ece0;border-left:1px solid #ccc;padding:6px 7px;display:flex;flex-direction:column;gap:0}
+.cs-cls-section{margin-bottom:6px}
+.cs-cls-section:last-child{margin-bottom:0}
+.cs-cls-title{font-size:7.5px;letter-spacing:.22em;text-transform:uppercase;color:#666;margin-bottom:3px;border-bottom:1px solid #ccc;padding-bottom:2px}
+.cs-cls-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1.5px}
+.cs-cls-name{font-size:8.5px;color:#222;flex:1;line-height:1.25;padding-right:3px}
+.cs-cls-val{font-size:9px;font-weight:700;color:#1a1520;white-space:nowrap}
+.cs-cls-oth{font-size:8px;color:#aaa;font-style:italic}
+/* bar strip */
+.cs-bar-wrap{padding:6px 10px;border-top:1px solid #bbb;background:#eae4d8}
+.cs-bar-legend{display:flex;gap:10px;font-size:7.5px;color:#666;margin-bottom:2px;align-items:center}
+.cs-bar-leg-item{display:flex;align-items:center;gap:3px}
+.cs-bar-legend-right{margin-left:auto;font-size:7.5px;color:#666}
+.cs-bar-swatch{display:inline-block;width:12px;height:5px}
+.cs-bar-outer{position:relative;height:10px;background:#ddd;border:1px solid #aaa}
+.cs-bar-racial{position:absolute;left:0;top:0;bottom:0;background:#9b5acc}
+.cs-bar-job{position:absolute;top:0;bottom:0;background:#3a8ab0}
+.cs-bar-bottom{display:flex;justify-content:space-between;font-size:7.5px;color:#555;margin-top:2px}
+/* ability chart — compact */
+.cs-bottom{border-top:1px solid #bbb;background:#eae4d8;padding:6px 10px}
+.cs-status-lbl{font-size:7.5px;letter-spacing:.15em;text-transform:uppercase;color:#666;margin-bottom:3px}
+.cs-ab-wrap{display:flex;gap:3px}
+.cs-ab-vert{display:flex;flex-direction:column}
+.cs-ab-letter{font-size:8.5px;font-weight:700;color:#666;width:9px;height:17px;display:flex;align-items:center;justify-content:center}
+.cs-ab-rows{flex:1;display:flex;flex-direction:column;gap:1px}
+.cs-ab-row{display:flex;align-items:center;gap:5px;height:17px}
+.cs-ab-lbl{font-size:7.5px;color:#444;width:42px;text-align:right;flex-shrink:0}
+.cs-ab-bg{flex:1;height:8px;background:#c0b8a8;border:1px solid #aaa;position:relative;overflow:hidden}
+.cs-ab-fill{height:100%;position:relative}
+.cs-ab-fill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:2px;background:rgba(255,255,255,.35)}
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--brd2)}
+::-webkit-scrollbar-thumb:hover{background:var(--cr)}
+.hidden{display:none!important}
+#finput{display:none}
+@media print{body>*:not(.ov-sheet){display:none}.ov-sheet{position:static;background:none;padding:0}.sm{max-width:100%;box-shadow:none}.sm-btns{display:none}}
+</style>
+</head>
+<body>
+<div class="embers" id="embers"></div>
+<div id="toast"></div>
+<div id="conf-ov" class="ov-conf hidden"></div>
+<div id="sheet-ov" class="ov-sheet hidden"></div>
+<input type="file" id="finput" accept=".json"/>
+
+<div class="page-outer">
+
+  <!-- TOP SECTION: full-width header, name, stats, caption, gen button -->
+  <div class="page-top">
+    <header class="hdr">
+      <div class="eyebrow">The Great Tomb of YGGDRASIL</div>
+      <h1 class="site-title">Character <span class="blood">Grimoire</span></h1>
+      <p class="site-sub">Inscribe your race, your talents, your apex — then ascend.</p>
+    </header>
+
+    <div class="name-wrap">
+      <label>Character Name</label>
+      <input class="name-inp" id="charName" type="text" placeholder="Name your champion…"/>
+    </div>
+
+    <div class="stat-pan">
+      <div class="srow"><div class="slbl racial">Racial</div><div class="btrack"><div class="bfill racial" id="bar-r" style="width:0%"></div></div><div class="bval racial" id="val-r">0 / 100</div></div>
+      <div class="srow"><div class="slbl job">Job</div><div class="btrack"><div class="bfill job" id="bar-j" style="width:0%"></div></div><div class="bval job" id="val-j">0 / 100</div></div>
+      <div class="sdiv"></div>
+      <div class="srow"><div class="slbl total" id="lbl-t">Total</div><div class="btrack"><div class="bfill total" id="bar-t" style="width:0%"></div></div><div class="bval total" id="val-t">0 / 100</div></div>
+    </div>
+
+    <p class="caption">Racial and Job levels are yours to balance — the only seal that binds you is the total of one hundred. Standard classes bear fifteen levels; Prestige, ten; Capstone, five — and only one Capstone may be inscribed.</p>
+
+    <button class="bgen" id="btn-gen">⚔ &nbsp; Generate Character Sheet &nbsp; ⚔</button>
+  </div>
+
+  <!-- TWO-COLUMN SECTION -->
+  <div class="page-cols">
+
+    <!-- LEFT COLUMN: Character Details + Ability Chart -->
+    <div class="col-left">
+      <div class="rdiv"><div class="ln"></div><div class="gl">✦ Character Details ✦</div><div class="ln r"></div></div>
+      <div class="cpanel" id="det-panel">
+        <div class="chdr" id="det-hdr"><div class="chdr-l"><div class="ctitle gd">Identity &amp; Titles</div></div><div class="chevron open" id="det-chev">▼</div></div>
+        <div class="cbody open" id="det-body">
+          <div class="dgrid" style="margin-bottom:.7rem">
+            <div class="dfield"><label>Character No.</label><input class="dinp" type="number" id="d-num" value="1" min="1" style="width:5rem"/></div>
+            <div class="dfield"><label>Race Type</label><input class="dinp" id="d-race" type="text" placeholder="Heteromorphic Race"/></div>
+            <div class="dfield"><label>Name (Japanese / display)</label><input class="dinp" id="d-jp" type="text" placeholder="モモンガ"/></div>
+            <div class="dfield"><label>Romanized Name</label><input class="dinp" id="d-rom" type="text" placeholder="MOMONGA"/></div>
+            <div class="dfield"><label>Name Phonetic</label><input class="dinp" id="d-phon" type="text" placeholder="[momonga]"/></div>
+            <div class="dfield"><label>Guild / Organization</label><input class="dinp" id="d-guild" type="text" placeholder="アインズ・ウール・ゴウン"/></div>
+            <div class="dfield"><label>Guild Phonetic</label><input class="dinp" id="d-gphon" type="text" placeholder="ainz ooal gown"/></div>
+            <div class="dfield"><label>Alignment</label><input class="dinp" id="d-align" type="text" placeholder="Extreme Evil"/></div>
+            <div class="dfield"><label>Sense of Justice</label><input class="dinp" id="d-just" type="text" placeholder="-500"/></div>
+            <div class="dfield"><label>Residence</label><input class="dinp" id="d-res" type="text" placeholder="Great Tomb of Nazarick"/></div>
+            <div class="dfield"><label>Room / Sub-location</label><input class="dinp" id="d-room" type="text" placeholder="Room in level 9"/></div>
+          </div>
+          <div class="dfield" style="margin-bottom:.7rem"><label>Job / Role (separate with |)</label><input class="dinp" id="d-job" type="text" placeholder="One of the Almighty 41 Supreme Beings | Ruler of the Great Tomb of Nazarick"/></div>
+          <div class="dfield" style="margin-bottom:.7rem"><label>Title (descriptive headline)</label><input class="dinp" id="d-title" type="text" placeholder="THE STRONGEST MAGIC CASTER WITH THE APPEARANCE OF A SKELETON"/></div>
+          <div class="dfield"><label>Image URL (optional)</label><input class="dinp" id="d-img" type="text" placeholder="https://…"/></div>
+        </div>
+      </div>
+
+      <div class="cpanel red-top" id="ab-panel">
+        <div class="chdr" id="ab-hdr"><div class="chdr-l"><div class="ctitle cr">Ability Chart</div></div><div class="chevron open" id="ab-chev">▼</div></div>
+        <div class="cbody open" id="ab-body"><div id="ab-grid"></div></div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: Vault + Class Builder -->
+    <div class="col-right">
+      <div class="rdiv"><div class="ln"></div><div class="gl">✦ The Vault of Tomes ✦</div><div class="ln r"></div></div>
+      <div class="cpanel" id="vault-panel">
+        <div class="chdr" id="vault-hdr"><div class="chdr-l"><div class="ctitle gd">Saved Tomes</div><div class="ccount" id="vault-count">0 tomes sealed</div></div><div class="chevron open" id="vault-chev">▼</div></div>
+        <div class="cbody open" id="vault-body">
+          <div class="vact">
+            <button class="bvault imp" id="btn-imp">⊕ Import Tome (.json)</button>
+            <button class="bvault exp" id="btn-exp">↓ Export Current Build</button>
+          </div>
+          <div class="slist" id="slist"></div>
+          <div class="save-row">
+            <input class="sinp" id="sinp" type="text" placeholder="Name this tome to seal it…"/>
+            <button class="bseal" id="btn-seal">⊕ Seal Tome</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="rdiv"><div class="ln"></div><div class="gl">✦ ᚱ ✦</div><div class="ln r"></div></div>
+      <button class="badd" id="btn-add">⊕ Inscribe New Class</button>
+      <div class="form-panel hidden" id="form-panel" data-title="Class Inscription"></div>
+      <div id="build-list"></div>
+      <div class="summ hidden" id="summ"></div>
+    </div>
+
+  </div><!-- end .page-cols -->
+
+  <div class="ftr">Standard ≤ 15 · Prestige ≤ 10 · Capstone ≤ 5 · One Capstone · Total ≤ 100<br/>YGGDRASIL Character Builder — For the glory of Ainz Ooal Gown</div>
+</div>
+
+<script>
+const TCAP={standard:15,prestige:10,capstone:5};
+const SK='yggdrasil_v3';
+const ABMAP=[
+  {k:'HP',   l:'HP'},
+  {k:'MP',   l:'MP'},
+  {k:'PATK', l:'PHY. ATK'},
+  {k:'PDEF', l:'PHY. DEF'},
+  {k:'AGI',  l:'AGILITY'},
+  {k:'MATK', l:'MAG. ATK'},
+  {k:'MDEF', l:'MAG. DEF'},
+  {k:'RES',  l:'RESIST'},
+  {k:'SPC',  l:'SPECIAL'},
+];
+
+/* ── DEFAULT BUILD ── */
+const DEFAULT={
+  charName:'Momonga',
+  det:{num:1,jp:'モモンガ',race:'Heteromorphic Race',guild:'アインズ・ウール・ゴウン',gphon:'ainz ooal gown',rom:'MOMONGA',phon:'[momonga]',title:'THE STRONGEST MAGIC CASTER WITH THE APPEARANCE OF A SKELETON',job:'One of the Almighty 41 Supreme Beings|Ruler of the Great Tomb of Nazarick',res:'Great Tomb of Nazarick',room:'Room in level 9',align:'Extreme Evil',just:'-500',img:''},
+  ab:{HP:42,MP:95,PATK:35,PDEF:38,AGI:44,MATK:98,MDEF:72,RES:62,SPC:88},
+  classes:[
+    {name:'Skeleton Mage', cat:'racial',type:'standard',maxLv:15,lv:15,prereqs:[]},
+    {name:'Elder Lich',    cat:'racial',type:'prestige', maxLv:10,lv:10,prereqs:['Skeleton Mage']},
+    {name:'Overlord Form', cat:'racial',type:'prestige', maxLv:5, lv:5, prereqs:['Elder Lich']},
+    {name:'Others (Racial)',cat:'racial',type:'standard',maxLv:10,lv:10,prereqs:[]},
+    {name:'Necromancer',   cat:'job',   type:'standard', maxLv:10,lv:10,prereqs:[]},
+    {name:'Ruler of Death',cat:'job',   type:'prestige', maxLv:10,lv:10,prereqs:['Necromancer']},
+    {name:'Others (Job)',  cat:'job',   type:'standard', maxLv:15,lv:35,prereqs:[]},
+    {name:'Eclipse',       cat:'job',   type:'capstone', maxLv:5, lv:5, prereqs:['Ruler of Death']},
+  ]
+};
+
+/* ── STATE ── */
+let S={
+  charName:'',
+  det:{num:1,jp:'',race:'',guild:'',gphon:'',rom:'',phon:'',title:'',job:'',res:'',room:'',align:'',just:'',img:''},
+  ab:{HP:50,MP:50,PATK:50,PDEF:50,AGI:50,MATK:50,MDEF:50,RES:50,SPC:50},
+  classes:[],editId:null,showForm:false,
+  openDet:true,openAb:true,openVault:true,
+  fd:{name:'',cat:'racial',type:'standard',maxLv:'',prereqs:''}
+};
+let nid=1;
+const uid=()=>`c${nid++}`;
+let tTimer=null;
+
+/* ── DERIVED ── */
+const total  =()=>S.classes.reduce((s,c)=>s+c.lv,0);
+const racialLv=()=>S.classes.filter(c=>c.cat==='racial').reduce((s,c)=>s+c.lv,0);
+const jobLv  =()=>S.classes.filter(c=>c.cat==='job').reduce((s,c)=>s+c.lv,0);
+const hasCap =()=>S.classes.some(c=>c.type==='capstone');
+const metReqs=c=>{
+  if(!c.prereqs.length)return true;
+  const ns=S.classes.map(x=>x.name.trim().toLowerCase());
+  return c.prereqs.every(p=>ns.includes(p.trim().toLowerCase()));
+};
+
+/* ── STORAGE ── */
+const getSaves =()=>{try{return JSON.parse(localStorage.getItem(SK)||'[]')}catch{return[]}};
+const putSaves =d=>{try{localStorage.setItem(SK,JSON.stringify(d))}catch{}};
+
+/* ── TOAST ── */
+function toast(msg,t='inf'){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className=`show ${t}`;
+  clearTimeout(tTimer);tTimer=setTimeout(()=>el.className=t,3200);
+}
+
+/* ── CONFIRM ── */
+function confirm2(msg,cb){
+  const ov=document.getElementById('conf-ov');
+  ov.classList.remove('hidden');
+  ov.innerHTML=`<div class="conf-box"><div class="conf-ttl">✦ Confirm Action ✦</div><div class="conf-msg">${esc(msg)}</div><div class="conf-act"><button class="bcy" id="cy">✦ Confirm</button><button class="bcn" id="cn">Cancel</button></div></div>`;
+  document.getElementById('cy').onclick=()=>{ov.classList.add('hidden');cb()};
+  document.getElementById('cn').onclick=()=>ov.classList.add('hidden');
+}
+
+/* ── ABILITY GRID ── */
+function buildAbGrid(){
+  document.getElementById('ab-grid').innerHTML=ABMAP.map(a=>`
+    <div class="arow">
+      <div class="albl">${a.l}</div>
+      <input type="range" min="0" max="100" value="${S.ab[a.k]}" class="aslider" data-k="${a.k}" id="asl-${a.k}"/>
+      <div class="aval" id="av-${a.k}">${S.ab[a.k]}</div>
+    </div>`).join('');
+  document.getElementById('ab-grid').querySelectorAll('.aslider').forEach(sl=>{
+    sl.addEventListener('input',e=>{
+      S.ab[e.target.dataset.k]=+e.target.value;
+      document.getElementById(`av-${e.target.dataset.k}`).textContent=e.target.value;
+    });
+  });
+}
+function syncAbGrid(){
+  ABMAP.forEach(a=>{
+    const sl=document.getElementById(`asl-${a.k}`);
+    if(sl){sl.value=S.ab[a.k];document.getElementById(`av-${a.k}`).textContent=S.ab[a.k];}
+  });
+}
+
+/* ── DETAILS DOM SYNC ── */
+function readDet(){
+  S.det={
+    num:  +document.getElementById('d-num').value||1,
+    jp:   document.getElementById('d-jp').value,
+    race: document.getElementById('d-race').value,
+    guild:document.getElementById('d-guild').value,
+    gphon:document.getElementById('d-gphon').value,
+    rom:  document.getElementById('d-rom').value,
+    phon: document.getElementById('d-phon').value,
+    title:document.getElementById('d-title').value,
+    job:  document.getElementById('d-job').value,
+    res:  document.getElementById('d-res').value,
+    room: document.getElementById('d-room').value,
+    align:document.getElementById('d-align').value,
+    just: document.getElementById('d-just').value,
+    img:  document.getElementById('d-img').value,
+  };
+}
+function writeDet(){
+  const d=S.det;
+  document.getElementById('d-num').value  =d.num||1;
+  document.getElementById('d-jp').value   =d.jp||'';
+  document.getElementById('d-race').value =d.race||'';
+  document.getElementById('d-guild').value=d.guild||'';
+  document.getElementById('d-gphon').value=d.gphon||'';
+  document.getElementById('d-rom').value  =d.rom||'';
+  document.getElementById('d-phon').value =d.phon||'';
+  document.getElementById('d-title').value=d.title||'';
+  document.getElementById('d-job').value  =d.job||'';
+  document.getElementById('d-res').value  =d.res||'';
+  document.getElementById('d-room').value =d.room||'';
+  document.getElementById('d-align').value=d.align||'';
+  document.getElementById('d-just').value =d.just||'';
+  document.getElementById('d-img').value  =d.img||'';
+}
+
+/* ── CHARACTER SHEET ── */
+function genSheet(){
+  readDet();
+  const d=S.det,ab=S.ab;
+  const tot=total(),rac=racialLv(),job=jobLv();
+  const rPct=tot?+(rac/tot*100).toFixed(1):0;
+  const jPct=tot?+(job/tot*100).toFixed(1):0;
+
+  const racCls=S.classes.filter(c=>c.cat==='racial');
+  const jobCls=S.classes.filter(c=>c.cat==='job');
+
+  // Show ALL classes, no limit, no Others bucket
+  function clsSection(arr, title){
+    if(!arr.length) return '';
+    const rows = arr.map(c=>`<div class="cs-cls-row"><span class="cs-cls-name">${esc(c.name)}</span><span class="cs-cls-val">${c.lv} lv</span></div>`).join('');
+    return `<div class="cs-cls-section"><div class="cs-cls-title">${title}</div>${rows}</div>`;
+  }
+
+  const img=d.img
+    ?`<img src="${esc(d.img)}" alt="" onerror="this.parentElement.innerHTML='<div class=cs-img-ph><span class=sk>💀</span><span class=hint>Image failed to load</span></div>'"/>`
+    :`<div class="cs-img-ph"><span class="sk">💀</span><span class="hint">No image — paste URL in Character Details</span></div>`;
+
+  const jobLines=(d.job||'').split('|').filter(Boolean);
+
+  const abRows=ABMAP.map(a=>{
+    const v=ab[a.k];
+    const color=v>75?'linear-gradient(90deg,#5a3080,#c080ff)':v>45?'linear-gradient(90deg,#2a4070,#5090d0)':'linear-gradient(90deg,#401010,#903030)';
+    return`<div class="cs-ab-row"><div class="cs-ab-lbl">${a.l}</div><div class="cs-ab-bg"><div class="cs-ab-fill" style="width:${v}%;background:${color}"></div></div></div>`;
+  }).join('');
+
+  const sheet=`<div class="cs">
+  <div class="cs-hdr">
+    <span class="cs-hdr-char">Character &nbsp; ${esc(String(d.num||1))}</span>
+    <span class="cs-hdr-race">${esc(d.race)}</span>
+  </div>
+  <div class="cs-top">
+    <div class="cs-img">${img}</div>
+    <div class="cs-inf">
+      <div class="cs-jp">${esc(d.jp||S.charName)}</div>
+      ${d.guild?`<div class="cs-guild"><span>[${esc(d.guild)}]</span>${d.gphon?` <span style="border:none;color:#777;font-style:italic">${esc(d.gphon)}</span>`:''}</div>`:''}
+      <div class="cs-rom">${esc(d.rom||S.charName)}</div>
+      ${d.phon?`<div class="cs-phon">${esc(d.phon)}</div>`:''}
+      <div class="cs-title">${esc(d.title)}</div>
+      <table class="cs-tbl">
+        ${jobLines.length?`<tr><td class="lbl">Job</td><td class="val">${jobLines.map(esc).join('<br/>')}</td></tr>`:''}
+        ${d.res?`<tr><td class="lbl">Residence</td><td class="val">${esc(d.res)}</td></tr>`:''}
+        ${d.room?`<tr><td class="lbl"></td><td class="val">${esc(d.room)}</td></tr>`:''}
+        ${d.align?`<tr><td class="lbl">Alignment</td><td class="val">${esc(d.align)}</td></tr>`:''}
+      </table>
+      ${d.just?`<div class="cs-just"><span>Sense of Justice &nbsp;<strong>${esc(d.just)}</strong></span></div>`:''}
+    </div>
+    <div class="cs-cls">
+      ${clsSection(racCls,'Racial Level')}
+      ${clsSection(jobCls,'Job Level')}
+    </div>
+  </div>
+  <div class="cs-bar-wrap">
+    <div class="cs-bar-legend">
+      <div class="cs-bar-leg-item"><span class="cs-bar-swatch" style="background:#9b5acc"></span>Racial level</div>
+      <div class="cs-bar-leg-item"><span class="cs-bar-swatch" style="background:#3a8ab0"></span>Job level</div>
+      <span class="cs-bar-legend-right">[Racial level] + [Job level] = Total 100 level</span>
+    </div>
+    <div class="cs-bar-outer">
+      <div class="cs-bar-racial" style="width:${rPct}%"></div>
+      <div class="cs-bar-job"    style="left:${rPct}%;width:${jPct}%"></div>
+    </div>
+    <div class="cs-bar-bottom">
+      <span>Total ${rac} level</span>
+      <span>50</span>
+      <span>Total ${job} level</span>
+    </div>
+  </div>
+  <div class="cs-bottom">
+    <div class="cs-status-lbl">status</div>
+    <div class="cs-ab-wrap">
+      <div class="cs-ab-vert">${'ABILITY'.split('').map(l=>`<div class="cs-ab-letter">${l}</div>`).join('')}</div>
+      <div class="cs-ab-vert">${'CHART'.split('').map(l=>`<div class="cs-ab-letter">${l}</div>`).join('')}</div>
+      <div class="cs-ab-rows">${abRows}</div>
+    </div>
+  </div>
+</div>`;
+
+  const ov=document.getElementById('sheet-ov');
+  ov.classList.remove('hidden');
+  ov.innerHTML=`<div class="sm"><div class="sm-btns"><button class="sm-btn print" id="sm-print">🖨 Print / Save PDF</button><button class="sm-btn close" id="sm-close">✕ Close</button></div>${sheet}</div>`;
+  document.getElementById('sm-close').onclick=()=>ov.classList.add('hidden');
+  document.getElementById('sm-print').onclick=()=>window.print();
+  ov.onclick=e=>{if(e.target===ov)ov.classList.add('hidden')};
+}
+
+/* ── VAULT ── */
+function snapshot(){
+  readDet();
+  return{charName:S.charName,det:{...S.det},ab:{...S.ab},classes:S.classes.map(c=>({...c}))};
+}
+function applySnapshot(data){
+  S.charName=data.charName||'';
+  S.det={...S.det,...(data.det||{})};
+  S.ab={...S.ab,...(data.ab||{})};
+  S.classes=(data.classes||[]).map(c=>({...c,id:uid()}));
+  document.getElementById('charName').value=S.charName;
+  writeDet();syncAbGrid();
+}
+
+function sealTome(){
+  const raw=document.getElementById('sinp').value.trim();
+  const name=raw||S.charName||'Unnamed Build';
+  if(!S.classes.length){toast('Nothing is inscribed — seal a build first.','wrn');return;}
+  readDet();
+  const saves=getSaves();
+  const ex=saves.find(s=>s.name.toLowerCase()===name.toLowerCase());
+  const go=()=>{
+    const e={id:ex?ex.id:`s${Date.now()}`,name,savedAt:Date.now(),...snapshot()};
+    if(ex){saves[saves.findIndex(s=>s.id===ex.id)]=e;toast(`"${name}" rewritten.`,'ok');}
+    else{saves.push(e);toast(`"${name}" sealed in the vault.`,'ok');}
+    putSaves(saves);document.getElementById('sinp').value='';renderVault();
+  };
+  ex?confirm2(`Overwrite tome "${name}"?`,go):go();
+}
+
+function loadTome(id){
+  const e=getSaves().find(s=>s.id===id);
+  if(!e){toast('Tome not found.','err');return;}
+  applySnapshot(e);S.showForm=false;S.editId=null;
+  toast(`"${e.name}" unsealed.`,'ok');render();
+}
+function delTome(id){
+  const e=getSaves().find(s=>s.id===id);if(!e)return;
+  confirm2(`Destroy "${e.name}" forever?`,()=>{putSaves(getSaves().filter(s=>s.id!==id));toast(`"${e.name}" destroyed.`,'inf');renderVault();});
+}
+function dlTome(id){
+  const e=getSaves().find(s=>s.id===id);if(!e)return;
+  dl(e,`${e.name.replace(/[^a-z0-9]/gi,'_').toLowerCase()}.json`);
+}
+function expCurrent(){
+  if(!S.classes.length){toast('Nothing inscribed.','wrn');return;}
+  readDet();
+  const e={id:`x${Date.now()}`,name:S.charName||'build',savedAt:Date.now(),...snapshot()};
+  dl(e,`${(S.charName||'build').replace(/[^a-z0-9]/gi,'_').toLowerCase()}.json`);
+  toast(`"${e.name}" exported.`,'ok');
+}
+function dl(obj,fname){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(obj,null,2)],{type:'application/json'}));
+  a.download=fname;a.click();URL.revokeObjectURL(a.href);
+}
+function impFile(file){
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const d=JSON.parse(e.target.result);
+      if(!d.name||!Array.isArray(d.classes))throw 0;
+      const saves=getSaves();
+      const ex=saves.find(s=>s.name.toLowerCase()===d.name.toLowerCase());
+      const go=()=>{
+        const entry={...d,id:ex?ex.id:`i${Date.now()}`,savedAt:Date.now()};
+        if(ex){saves[saves.findIndex(s=>s.id===ex.id)]=entry;}else saves.push(entry);
+        putSaves(saves);toast(`"${d.name}" imported.`,'ok');renderVault();
+      };
+      ex?confirm2(`Overwrite existing tome "${d.name}"?`,go):go();
+    }catch{toast('Corrupted file — could not import.','err');}
+  };
+  r.readAsText(file);
+}
+
+/* ── CLASS ACTIONS ── */
+function chgLv(id,delta){
+  const c=S.classes.find(x=>x.id===id);if(!c)return;
+  const nxt=c.lv+delta;
+  if(nxt<0||nxt>c.maxLv)return;
+  if(total()+delta>100){toast('The seal of one hundred cannot be broken.','err');return;}
+  c.lv=nxt;render();
+}
+const remClass=id=>{S.classes=S.classes.filter(c=>c.id!==id);render();};
+function openAdd(){S.editId=null;S.fd={name:'',cat:'racial',type:'standard',maxLv:'',prereqs:''};S.showForm=true;render();setTimeout(()=>document.getElementById('f-name')?.focus(),60);}
+function openEdit(id){
+  const c=S.classes.find(x=>x.id===id);if(!c)return;
+  S.editId=id;S.fd={name:c.name,cat:c.cat,type:c.type,maxLv:String(c.maxLv),prereqs:c.prereqs.join(', ')};
+  S.showForm=true;render();setTimeout(()=>document.getElementById('f-name')?.focus(),60);
+}
+function submitForm(){
+  const fd=S.fd,name=fd.name.trim();
+  if(!name){toast('Enter a class name.','err');return;}
+  const hard=TCAP[fd.type],maxLv=Math.min(parseInt(fd.maxLv)||hard,hard);
+  const prereqs=fd.prereqs.split(',').map(s=>s.trim()).filter(Boolean);
+  if(fd.type==='capstone'&&hasCap()&&!S.editId){toast('Only one Capstone allowed.','err');return;}
+  if(S.editId){
+    const i=S.classes.findIndex(c=>c.id===S.editId);
+    if(i>=0)S.classes[i]={...S.classes[i],name,cat:fd.cat,type:fd.type,maxLv,lv:Math.min(S.classes[i].lv,maxLv),prereqs};
+    toast(`"${name}" updated.`,'ok');
+  }else{
+    if(total()+1>100){toast('Would exceed level 100.','err');return;}
+    S.classes.push({id:uid(),name,cat:fd.cat,type:fd.type,maxLv,lv:1,prereqs});
+    toast(`"${name}" inscribed.`,'ok');
+  }
+  S.showForm=false;S.editId=null;S.fd={name:'',cat:'racial',type:'standard',maxLv:'',prereqs:''};render();
+}
+const cancelForm=()=>{S.showForm=false;S.editId=null;render();};
+
+/* ── HELPERS ── */
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fmtD=ts=>new Date(ts).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+const metaStr=cls=>{const t=cls.reduce((s,c)=>s+c.lv,0),r=cls.filter(c=>c.cat==='racial').reduce((s,c)=>s+c.lv,0),j=cls.filter(c=>c.cat==='job').reduce((s,c)=>s+c.lv,0),cap=cls.find(c=>c.type==='capstone');return`Lv ${t}/100 · ${cls.length} classes · R${r}/J${j}${cap?' · ⚔ '+cap.name:''}`;};
+
+/* ── RENDER BARS ── */
+function rBars(){
+  const t=total(),r=racialLv(),j=jobLv(),done=t>=100;
+  document.getElementById('bar-r').style.width=`${Math.min(100,r)}%`;
+  document.getElementById('bar-j').style.width=`${Math.min(100,j)}%`;
+  document.getElementById('bar-t').style.width=`${Math.min(100,t)}%`;
+  document.getElementById('val-r').textContent=`${r} / 100`;
+  document.getElementById('val-j').textContent=`${j} / 100`;
+  document.getElementById('val-t').textContent=`${t} / 100`;
+  document.getElementById('bar-t').className=`bfill ${done?'done':'total'}`;
+  document.getElementById('val-t').className=`bval ${done?'done':'total'}`;
+  document.getElementById('lbl-t').className=`slbl ${done?'done':'total'}`;
+}
+
+/* ── RENDER COLLAPSIBLES ── */
+function rColls(){
+  const set=(b,c,o)=>{document.getElementById(b).className=`cbody ${o?'open':''}`;document.getElementById(c).className=`chevron ${o?'open':''}`;};
+  set('det-body','det-chev',S.openDet);
+  set('ab-body','ab-chev',S.openAb);
+  set('vault-body','vault-chev',S.openVault);
+}
+
+/* ── RENDER VAULT ── */
+function renderVault(){
+  const saves=getSaves();
+  document.getElementById('vault-count').textContent=`${saves.length} ${saves.length===1?'tome':'tomes'} sealed`;
+  const list=document.getElementById('slist');
+  if(!saves.length){list.innerHTML=`<div class="sempty">The vault is empty. Seal a tome or import a .json file.</div>`;return;}
+  list.innerHTML=saves.map(s=>`
+    <div class="sentry">
+      <div class="sinfo"><div class="sname">${esc(s.name)}</div><div class="smeta">${esc(metaStr(s.classes))} · ${fmtD(s.savedAt)}</div></div>
+      <div class="sacts">
+        <button class="sbtn load" data-id="${esc(s.id)}">Unseal</button>
+        <button class="sbtn dl"   data-id="${esc(s.id)}">Export</button>
+        <button class="sbtn del"  data-id="${esc(s.id)}">Destroy</button>
+      </div>
+    </div>`).join('');
+  list.querySelectorAll('.sbtn.load').forEach(b=>b.onclick=()=>loadTome(b.dataset.id));
+  list.querySelectorAll('.sbtn.dl').forEach(b=>b.onclick=()=>dlTome(b.dataset.id));
+  list.querySelectorAll('.sbtn.del').forEach(b=>b.onclick=()=>delTome(b.dataset.id));
+}
+
+/* ── RENDER FORM ── */
+function renderForm(){
+  const pan=document.getElementById('form-panel'),add=document.getElementById('btn-add');
+  if(!S.showForm){pan.classList.add('hidden');add.classList.remove('hidden');return;}
+  add.classList.add('hidden');pan.classList.remove('hidden');
+  const fd=S.fd,ie=!!S.editId,cw=fd.type==='capstone'&&hasCap()&&!S.editId;
+  const others=S.classes.filter(c=>c.id!==S.editId);
+  pan.setAttribute('data-title',ie?'Rewrite Class':'Class Inscription');
+  pan.innerHTML=`
+    <div class="field"><label>Class Name</label><input type="text" id="f-name" placeholder="e.g. Elder Lich…" value="${esc(fd.name)}"/></div>
+    <div class="field"><label>Category</label>
+      <div class="tgrp">
+        <button class="tbtn ${fd.cat==='racial'?'ar':''}" data-cat="racial">Racial</button>
+        <button class="tbtn ${fd.cat==='job'?'aj':''}" data-cat="job">Job</button>
+      </div></div>
+    <div class="field"><label>Class Type</label>
+      <div class="tgrp">
+        <button class="tbtn ${fd.type==='standard'?'as':''}" data-type="standard">Standard<span class="tcap">max 15</span></button>
+        <button class="tbtn ${fd.type==='prestige'?'ap':''}" data-type="prestige">Prestige<span class="tcap">max 10</span></button>
+        <button class="tbtn ${fd.type==='capstone'?'ac':''}" data-type="capstone">Capstone<span class="tcap">max 5</span></button>
+      </div>${cw?`<div class="cwarn">⚠ A Capstone is already inscribed in this build.</div>`:''}</div>
+    <div class="field"><label>Max Levels <span style="text-transform:none;letter-spacing:0;color:var(--mt2);font-size:.7em">(cap: ${TCAP[fd.type]})</span></label>
+      <input type="number" id="f-mlv" min="1" max="${TCAP[fd.type]}" placeholder="${TCAP[fd.type]}" value="${esc(fd.maxLv)}"/></div>
+    <div class="field"><label>Prerequisites <span style="text-transform:none;letter-spacing:0;color:var(--mt2);font-size:.7em">(comma-separated)</span></label>
+      <input type="text" id="f-pre" placeholder="e.g. Skeleton Mage" value="${esc(fd.prereqs)}"/>
+      ${others.length?`<div class="chips">${others.map(c=>`<button class="chip" data-n="${esc(c.name)}">${esc(c.name)}</button>`).join('')}</div>`:''}</div>
+    <div class="fact">
+      <button class="bsub" id="f-ok">${ie?'✦ Save Changes':'✦ Inscribe Class'}</button>
+      <button class="bcanc" id="f-cn">Cancel</button>
+    </div>`;
+  document.getElementById('f-name').addEventListener('input',e=>S.fd.name=e.target.value);
+  document.getElementById('f-name').addEventListener('keydown',e=>{if(e.key==='Enter')submitForm();});
+  document.getElementById('f-mlv').addEventListener('input',e=>S.fd.maxLv=e.target.value);
+  document.getElementById('f-pre').addEventListener('input',e=>S.fd.prereqs=e.target.value);
+  pan.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{S.fd.cat=b.dataset.cat;renderForm();});
+  pan.querySelectorAll('[data-type]').forEach(b=>b.onclick=()=>{S.fd.type=b.dataset.type;S.fd.maxLv=String(TCAP[b.dataset.type]);renderForm();});
+  pan.querySelectorAll('.chip').forEach(ch=>ch.onclick=()=>{
+    const parts=document.getElementById('f-pre').value.split(',').map(s=>s.trim()).filter(Boolean);
+    if(!parts.includes(ch.dataset.n))parts.push(ch.dataset.n);
+    S.fd.prereqs=parts.join(', ');document.getElementById('f-pre').value=S.fd.prereqs;
+  });
+  document.getElementById('f-ok').onclick=submitForm;
+  document.getElementById('f-cn').onclick=cancelForm;
+}
+
+/* ── RENDER BUILD LIST ── */
+function renderBuild(){
+  const el=document.getElementById('build-list');
+  if(!S.classes.length){el.innerHTML=`<div class="empty"><span class="eg">⚰</span>No classes inscribed yet.<br/>Add your own or unseal a tome from the vault above.</div>`;return;}
+  const racial  =S.classes.filter(c=>c.cat==='racial');
+  const standard=S.classes.filter(c=>c.cat==='job'&&c.type==='standard');
+  const prestige=S.classes.filter(c=>c.cat==='job'&&c.type==='prestige');
+  const capstone=S.classes.filter(c=>c.cat==='job'&&c.type==='capstone');
+  const sec=(lbl,cls2,items)=>{
+    if(!items.length)return'';
+    const sum=items.reduce((s,c)=>s+c.lv,0);
+    const cards=items.map(c=>{
+      const w=!metReqs(c);
+      return`<div class="ccard ${c.type} ${w?'pwarn':''}">
+        <div class="cinfo">
+          <div class="cname">${esc(c.name)}</div>
+          <div class="cmeta">
+            <span class="badge ${c.type}">${c.type[0].toUpperCase()+c.type.slice(1)}</span>
+            <span class="badge ${c.cat}">${c.cat[0].toUpperCase()+c.cat.slice(1)}</span>
+            ${w?'<span class="badge warn">⚠ Prereq</span>':''}
+          </div>
+          ${c.prereqs.length?`<div class="cpreq">Requires: ${esc(c.prereqs.join(', '))}</div>`:''}
+        </div>
+        <div class="lvctl">
+          <button class="lvbtn" data-id="${c.id}" data-d="-1" ${c.lv<=0?'disabled':''}>−</button>
+          <div class="lvdisp"><span class="lvnum">${c.lv}</span><span class="lvmax">/${c.maxLv}</span></div>
+          <button class="lvbtn" data-id="${c.id}" data-d="1" ${c.lv>=c.maxLv||total()>=100?'disabled':''}>+</button>
+        </div>
+        <div class="cacts">
+          <button class="cbtn ed" data-id="${c.id}">✎</button>
+          <button class="cbtn rm" data-id="${c.id}">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+    return`<div class="sec-hd"><div class="sec-nm ${cls2}">${lbl}</div><div class="sec-rl"></div><div class="sec-ct">${items.length} classes · ${sum} lv</div></div><div class="clist">${cards}</div>`;
+  };
+  el.innerHTML=[
+    sec('Racial',        'racial',   racial),
+    sec('Job — Standard','std',      standard),
+    sec('Job — Prestige','pres',     prestige),
+    sec('Job — Capstone','cap',      capstone),
+  ].join('');
+  el.querySelectorAll('.lvbtn').forEach(b=>b.onclick=()=>chgLv(b.dataset.id,+b.dataset.d));
+  el.querySelectorAll('.cbtn.ed').forEach(b=>b.onclick=()=>openEdit(b.dataset.id));
+  el.querySelectorAll('.cbtn.rm').forEach(b=>b.onclick=()=>remClass(b.dataset.id));
+}
+
+/* ── RENDER SUMMARY ── */
+function renderSumm(){
+  const el=document.getElementById('summ');
+  if(!S.classes.length){el.classList.add('hidden');return;}
+  el.classList.remove('hidden');
+  const t=total(),r=racialLv(),j=jobLv(),done=t>=100;
+  const cap=S.classes.find(c=>c.type==='capstone');
+  const warn=S.classes.some(c=>!metReqs(c));
+  el.innerHTML=`
+    <div class="sgrid">
+      <div>Classes: <span class="v">${S.classes.length}</span></div>
+      <div>Racial: <span class="v" style="color:var(--pu2)">${r} lv</span></div>
+      <div>Job: <span class="v" style="color:var(--sk2)">${j} lv</span></div>
+    </div>
+    <div class="stot">Total sealed power: <span class="v ${done?'done':'prog'}">${t} / 100</span>${done?` <span class="v done">◆ Build Complete</span>`:''}</div>
+    ${cap?`<div class="scap">⚔ Capstone: ${esc(cap.name)}</div>`:''}
+    ${warn?`<div class="swarn">⚠ Some classes have unmet prerequisites.</div>`:''}`;
+}
+
+/* ── FULL RENDER ── */
+function render(){rBars();rColls();renderVault();renderForm();renderBuild();renderSumm();}
+
+/* ── EVENTS ── */
+document.getElementById('charName').oninput=e=>S.charName=e.target.value;
+document.getElementById('btn-gen').onclick=genSheet;
+document.getElementById('btn-add').onclick=openAdd;
+document.getElementById('btn-seal').onclick=sealTome;
+document.getElementById('sinp').addEventListener('keydown',e=>{if(e.key==='Enter')sealTome();});
+document.getElementById('btn-exp').onclick=expCurrent;
+document.getElementById('btn-imp').onclick=()=>{document.getElementById('finput').value='';document.getElementById('finput').click();};
+document.getElementById('finput').onchange=e=>{const f=e.target.files[0];if(f)impFile(f);};
+document.getElementById('det-hdr').onclick=()=>{S.openDet=!S.openDet;rColls();};
+document.getElementById('ab-hdr').onclick=()=>{S.openAb=!S.openAb;rColls();};
+document.getElementById('vault-hdr').onclick=()=>{S.openVault=!S.openVault;rColls();};
+
+/* ── EMBERS ── */
+(()=>{
+  const C=document.getElementById('embers');
+  const COLS=['#8c1f1f','#c9a43c','#5c2a00','#6b3a8c','#3a2a3a'];
+  for(let i=0;i<28;i++){
+    const e=document.createElement('div');e.className='ember';
+    const sz=1+Math.random()*2,lft=Math.random()*100,dur=6+Math.random()*10,del=Math.random()*12,dx=(Math.random()-.5)*60;
+    e.style.cssText=`left:${lft}%;width:${sz}px;height:${sz}px;background:${COLS[0|Math.random()*5]};animation-duration:${dur}s;animation-delay:${del}s;--dx:${dx}px;filter:blur(${Math.random()>.5?1:0}px);box-shadow:0 0 ${2+Math.random()*3}px currentColor`;
+    C.appendChild(e);
+  }
+})();
+
+/* ── INIT ── */
+(()=>{
+  S.charName=DEFAULT.charName;
+  S.det={...DEFAULT.det};
+  S.ab={...DEFAULT.ab};
+  S.classes=DEFAULT.classes.map(c=>({...c,id:uid()}));
+  document.getElementById('charName').value=S.charName;
+  writeDet();
+  buildAbGrid();
+  render();
+})();
+</script>
+</body>
+</html>
