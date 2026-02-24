@@ -8,4 +8,4 @@ I made this purely for generating crossover fanfiction characters
 
 The concept of Standard, Prestige and Capstone Job Classes are purely my headcanon for how the Overlord MMO might have structured character builds.
 
-![A link to the site] (https://kcarlos57.github.io/Overlord-Character-Sheet-Maker/)
+![A link to the site](https://kcarlos57.github.io/Overlord-Character-Sheet-Maker/)
